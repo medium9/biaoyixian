@@ -1,0 +1,178 @@
+.trail-app .topbar {
+  flex: 0 0 64px;
+  padding: 0 clamp(16px, 3vw, 42px);
+  background: #fbfcf7;
+}
+.trail-app .brand-icon { width: 36px; height: 36px; border-radius: 10px; font-size: 22px; }
+.trail-app .brand h1 { font-size: 19px; letter-spacing: 1px; }
+.trail-app .brand p { margin-top: 3px; }
+.trail-workspace { display: flex; flex-direction: column; overflow: hidden; }
+.trail-workspace .local-map {
+  position: relative;
+  inset: auto;
+  flex: 1 1 0;
+  min-height: min(230px, 43dvh);
+  background: #e8ecdf;
+}
+.trail-workspace .local-map .map-canvas { height: 100%; }
+.trail-workspace .north { top: 18px; left: 21px; pointer-events: none; }
+.map-person:focus-visible > rect { stroke: #b45d24; stroke-width: 2px; }
+.geographic-label .map-detail-name { fill: #607e61; font-size: 21px; letter-spacing: 3px; }
+.map-legend {
+  position: absolute;
+  right: 16px;
+  bottom: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 11px;
+  padding: 7px 10px;
+  border: 1px solid #d4dfd1;
+  border-radius: 8px;
+  background: #fcfcf3e8;
+  color: #536f5f;
+  font-size: 11px;
+  pointer-events: none;
+}
+.map-legend span:last-child { border-left: 1px solid #dce5d6; padding-left: 9px; }
+.trail-dock {
+  z-index: 1;
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  background: #f8f9f2;
+  border-top: 1px solid #cfdccc;
+  box-shadow: 0 -5px 28px #28523912;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.dock-inner { max-width: 1490px; margin: auto; padding: 15px clamp(16px, 3vw, 42px) 17px; }
+.dock-summary {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.5fr) minmax(200px, 1fr) minmax(195px, .8fr);
+  gap: clamp(16px, 3vw, 44px);
+  align-items: center;
+}
+.dock-guide h2 { margin: 0 0 5px; font-size: 21px; color: #214737; line-height: 1.24; }
+.dock-guide p { margin: 0; color: #526759; font-size: 12px; line-height: 1.55; }
+.progress-readout { display: flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
+.progress-readout strong { font-size: 25px; letter-spacing: -.5px; font-variant-numeric: tabular-nums; color: #234e3b; }
+.progress-readout strong small { font-size: 11px; letter-spacing: 0; }
+.progress-readout > span { color: #5d7162; font-size: 11px; }
+.dock-progress progress { display: block; margin: 7px 0 0; }
+.dock-checkpoint { display: flex; align-items: center; min-width: 0; min-height: 42px; }
+.dock-next { display: flex; align-items: center; gap: 9px; width: 100%; min-width: 0; color: #526947; }
+.dock-waypoint { display: grid; place-items: center; flex: 0 0 33px; height: 33px; border-radius: 9px; background: #e9eddb; color: #6a7847; font-size: 16px; }
+.dock-next small { display: block; margin-bottom: 3px; font-size: 10px; color: #65785c; }
+.dock-next strong { display: block; overflow-wrap: anywhere; font-size: 14px; }
+.waypoint-distance { font-size: 11px; white-space: nowrap; margin-left: auto; }
+.dock-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 11px;
+  border-top: 1px solid #dfe7d9;
+}
+.dock-controls button {
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid #d6e1d3;
+  border-radius: 8px;
+  background: #fffef9;
+  color: #375a48;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  touch-action: manipulation;
+}
+.dock-controls button:focus-visible { outline-offset: 1px; }
+.dock-controls button:hover:not(:disabled) { border-color: #749582; }
+.dock-controls .dock-primary { min-width: 132px; background: #205a44; color: #fff; border-color: #205a44; }
+.dock-controls .tap-boost:active { background: #a85322; border-color: #a85322; }
+.dock-controls .tap-boost span { margin-right: 4px; }
+.dock-map-tools, .travel-controls { display: flex; align-items: center; gap: 8px; }
+.dock-map-tools { margin-left: auto; }
+.dock-controls .dock-locate { color: #98501e; background: #fff5e6; border-color: #e9cfad; }
+.dock-zoom { display: flex; align-items: center; border: 1px solid #d6e1d3; border-radius: 8px; background: #fffef9; }
+.dock-zoom button { min-width: 34px; min-height: 36px; padding: 0 8px; border: 0; background: transparent; font-size: 17px; }
+.dock-zoom span { min-width: 32px; text-align: center; font-size: 11px; color: #587061; }
+.travel-switch { display: flex; gap: 2px; background: #e6eee2; border: 1px solid #dce7d9; border-radius: 9px; padding: 2px; }
+.dock-controls .travel-switch button { min-height: 32px; border: 1px solid transparent; border-radius: 6px; background: none; }
+.dock-controls .travel-switch button[aria-pressed=true] { background: #fffef9; color: #205a44; border-color: #dbe7dc; }
+.dock-controls .sound-toggle { color: #526e5c; }
+.speed-meter { min-width: 63px; }
+.speed-meter output { font-size: 14px; color: #99521e; font-variant-numeric: tabular-nums; }
+.speed-meter small { font-size: 9px; }
+.speed-track { height: 4px; margin-top: 4px; border-radius: 5px; background: #e5e9d9; overflow: hidden; }
+.speed-track span { display: block; height: 100%; background: #d67839; transition: width .08s linear; }
+.dock-pace { min-width: 0; margin: 0; }
+.dock-pace legend { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); }
+.dock-pace .modes { gap: 4px; }
+.dock-pace .modes button { display: flex; align-items: center; justify-content: center; gap: 4px; padding: 0 7px; }
+.dock-pace .modes strong { font-size: 12px; }
+.dock-pace .modes span { margin: 0; font-size: 10px; }
+.dock-pace .modes .chosen { border-color: #8daf99; background: #e9f2e9; }
+.dock-feedback { width: 100%; min-width: 0; }
+.dock-feedback .trail-feedback {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f0f3e6;
+  color: #345b39;
+  border: 1px solid #dde8d6;
+  border-radius: 8px;
+  padding: 5px 9px;
+  max-width: 100%;
+  animation: feedback-in .25s ease-out;
+}
+.feedback-seal { font-size: 18px; color: #597548; }
+.trail-feedback strong { font-size: 13px; overflow-wrap: anywhere; }
+.trail-feedback small, .trail-feedback div > span { display: none; }
+.trail-feedback button { margin-left: auto; border: 0; background: transparent; color: #4d6a55; font-size: 20px; }
+.dock-feedback .is-overtake { background: #fff2df; border-color: #efd7b5; color: #92531e; }
+.trail-dock .walker-info {
+  position: static;
+  width: auto;
+  padding: 8px 12px;
+  margin-top: 9px;
+  border: 1px solid #dfe7d9;
+  border-radius: 8px;
+  box-shadow: none;
+}
+.trail-dock .walker-info ul { display: flex; gap: 12px; margin: 4px 0 0; overflow-x: auto; }
+.trail-dock .walker-info li { min-width: 185px; padding: 5px 10px 5px 0; border-bottom: 0; }
+.arrival-ring, .pass-ring { transform-box: fill-box; transform-origin: center; animation: landmark-pulse .85s ease-out infinite; }
+.poi.arrived text { fill: #a36320; }
+.self-marker.overtaking .self-halo { fill: #ffc567; }
+@keyframes feedback-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes landmark-pulse { from { transform: scale(.7); opacity: 1; } to { transform: scale(1.7); opacity: 0; } }
+@media (max-width: 760px) {
+  .trail-app .topbar { flex-basis: 54px; }
+  .trail-app .brand p { font-size: 10px; }
+  .dock-inner { padding: 11px 10px 10px; }
+  .dock-summary { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 9px 11px; }
+  .dock-guide { grid-column: 1 / -1; }
+  .dock-guide h2 { font-size: 17px; }
+  .dock-guide p { font-size: 11px; }
+  .progress-readout { gap: 1px 5px; }
+  .progress-readout strong { font-size: 20px; }
+  .progress-readout > span { font-size: 10px; }
+  .dock-next strong { font-size: 12px; }
+  .dock-feedback .trail-feedback { gap: 5px; padding: 3px 5px; }
+  .trail-feedback strong { font-size: 11px; }
+  .dock-waypoint { flex-basis: 25px; height: 27px; }
+  .dock-controls { gap: 6px; margin-top: 8px; padding-top: 8px; }
+  .dock-controls button { min-height: 37px; padding: 0 8px; font-size: 11px; }
+  .dock-controls .dock-primary { flex: 1; min-width: 106px; }
+  .dock-map-tools { justify-content: space-between; width: 100%; }
+  .dock-map-tools > button { flex: 1; }
+  .travel-controls { gap: 6px; flex-wrap: wrap; }
+  .dock-pace .modes { gap: 4px; }
+  .dock-pace .modes button { padding-inline: 6px; }
+  .dock-zoom button { min-width: 32px; min-height: 35px; font-size: 17px; }
+  .map-legend { right: 8px; bottom: 7px; font-size: 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .arrival-ring, .pass-ring, .dock-feedback .trail-feedback { animation: none; }
+  .speed-track span { transition: none; }
+}

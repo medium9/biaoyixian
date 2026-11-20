@@ -1,0 +1,28 @@
+{
+  "name": "yunzou-biaoyixian",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.25.0",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vue-tsc --noEmit && vite build",
+    "typecheck": "vue-tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "validate:data": "tsx scripts/validate-map-data.ts"
+  },
+  "dependencies": {
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "vite": "^7.0.0",
+    "@vitejs/plugin-vue": "^6.0.0",
+    "typescript": "~5.9.0",
+    "vue-tsc": "^3.0.0",
+    "vitest": "^3.2.0",
+    "@playwright/test": "^1.56.0",
+    "@types/node": "^24.0.0",
+    "tsx": "^4.20.0"
+  }
+}

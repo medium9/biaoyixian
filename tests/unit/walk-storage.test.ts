@@ -1,0 +1,14 @@
+import {it,expect} from 'vitest';
+import {loadWalk,saveWalk,walkKey} from '../../src/services/data/walk-storage';
+const makeStorage=()=>{const data=new Map<string,string>();return {data,getItem:(k:string)=>data.get(k)??null,setItem:(k:string,v:string)=>{data.set(k,v);}};};
+const route={id:'biaoyixian',version:'1.0'};
+const session={profileId:'p1',routeId:route.id,routeVersion:route.version,mode:'hike' as const,progressM:4095,elapsedSeconds:3600,started:true};
+it('保存并还原模式、距离和有效时间；不根据离线时间增加',()=>{const s=makeStorage();saveWalk(s,session);expect(loadWalk(s,'p1',route)).toEqual(session);expect(loadWalk(s,'p2',route)).toBeNull();});
+it('反复保存覆盖同一身份的记录，旧页面不能回退进度',()=>{const s=makeStorage();saveWalk(s,session);saveWalk(s,{...session,progressM:8190,elapsedSeconds:7200});saveWalk(s,session);expect(s.data.size).toBe(1);expect(loadWalk(s,'p1',route)?.progressM).toBe(8190);});
+it('损坏、超出路线的记录报错，不当作全新用户',()=>{const s=makeStorage();s.setItem(walkKey('p1',route),'{');expect(()=>loadWalk(s,'p1',route)).toThrow();s.setItem(walkKey('p1',route),JSON.stringify({...session,progressM:999999}));expect(()=>loadWalk(s,'p1',route)).toThrow();});
+it('保存失败不伪装成功',()=>{expect(()=>saveWalk({getItem:()=>null,setItem(){throw Error('quota');}},session)).toThrow('保存');});
+it('新版保存控制方式、到访和声音；实际时长可超过9小时',()=>{const s=makeStorage();const saved={...session,elapsedSeconds:40000,controlMode:'tap' as const,visitedIds:['laohe'],soundEnabled:false};saveWalk(s,saved);expect(loadWalk(s,'p1',route)).toEqual(saved);});
+it('存储拒绝无效控制方式和到访数据',()=>{const s=makeStorage();for(const fields of [{controlMode:'bad'},{visitedIds:'laohe'},{soundEnabled:'yes'}]){s.setItem(walkKey('p1',route),JSON.stringify({...session,...fields}));expect(()=>loadWalk(s,'p1',route)).toThrow();}});
+it('不同标签页以更快速度走得更远时，不因时间较短而丢失进度',()=>{const s=makeStorage();saveWalk(s,{...session,progressM:100,elapsedSeconds:100});saveWalk(s,{...session,progressM:150,elapsedSeconds:30,controlMode:'tap',visitedIds:['laohe']});const saved=loadWalk(s,'p1',route)!;expect(saved.progressM).toBe(150);expect(saved.elapsedSeconds).toBe(100);expect(saved.controlMode).toBe('tap');expect(saved.visitedIds).toEqual(['laohe']);});
+import {advanceWalker} from '../../src/domain/walking/walking-engine';
+it('慢走以小时间步到终点后仍能保存恢复',()=>{const storage=makeStorage();let walker={id:'p1',nickname:'山友',mode:'stroll' as const,progressM:0,elapsedSeconds:0};for(let i=0;i<648005;i++)walker=advanceWalker(walker,0.05) as typeof walker;expect(walker.progressM).toBe(24570);saveWalk(storage,{...session,mode:'stroll',progressM:walker.progressM,elapsedSeconds:walker.elapsedSeconds});expect(()=>loadWalk(storage,'p1',route)).not.toThrow();});

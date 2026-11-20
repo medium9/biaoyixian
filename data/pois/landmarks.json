@@ -1,0 +1,138 @@
+[
+  {
+    "id": "start",
+    "name": "老和云起",
+    "x": 450,
+    "y": 180,
+    "level": 0,
+    "kind": "endpoint"
+  },
+  {
+    "id": "laohe",
+    "name": "老和山",
+    "x": 350,
+    "y": 315,
+    "level": 1,
+    "kind": "route"
+  },
+  {
+    "id": "beigao",
+    "name": "北高峰 · 财神庙",
+    "x": 180,
+    "y": 510,
+    "level": 1,
+    "kind": "route"
+  },
+  {
+    "id": "meiren",
+    "name": "美人峰",
+    "x": 75,
+    "y": 655,
+    "level": 2,
+    "kind": "route"
+  },
+  {
+    "id": "tianzhu",
+    "name": "天竺山",
+    "x": 70,
+    "y": 810,
+    "level": 1,
+    "kind": "route"
+  },
+  {
+    "id": "shili",
+    "name": "十里琅珰",
+    "x": 210,
+    "y": 1035,
+    "level": 0,
+    "kind": "route"
+  },
+  {
+    "id": "wuyun",
+    "name": "五云山",
+    "x": 225,
+    "y": 1210,
+    "level": 1,
+    "kind": "route"
+  },
+  {
+    "id": "jiuxi",
+    "name": "九溪烟树",
+    "x": 430,
+    "y": 1140,
+    "level": 1,
+    "kind": "background"
+  },
+  {
+    "id": "guiren",
+    "name": "贵人阁",
+    "x": 550,
+    "y": 960,
+    "level": 1,
+    "kind": "route"
+  },
+  {
+    "id": "manjue",
+    "name": "满觉陇",
+    "x": 675,
+    "y": 890,
+    "level": 2,
+    "kind": "route"
+  },
+  {
+    "id": "yuhuang",
+    "name": "玉皇山",
+    "x": 850,
+    "y": 900,
+    "level": 0,
+    "kind": "route"
+  },
+  {
+    "id": "end",
+    "name": "吴山大观",
+    "x": 1000,
+    "y": 620,
+    "level": 0,
+    "kind": "endpoint"
+  },
+  {
+    "id": "lingyin",
+    "name": "灵隐 · 飞来峰",
+    "x": 275,
+    "y": 650,
+    "level": 1,
+    "kind": "background"
+  },
+  {
+    "id": "leifeng",
+    "name": "雷峰塔",
+    "x": 805,
+    "y": 745,
+    "level": 1,
+    "kind": "background"
+  },
+  {
+    "id": "longjing",
+    "name": "龙井村",
+    "x": 415,
+    "y": 815,
+    "level": 2,
+    "kind": "background"
+  },
+  {
+    "id": "meijia",
+    "name": "梅家坞",
+    "x": 285,
+    "y": 1020,
+    "level": 2,
+    "kind": "background"
+  },
+  {
+    "id": "liuhe",
+    "name": "六和塔",
+    "x": 600,
+    "y": 1195,
+    "level": 1,
+    "kind": "background"
+  }
+]

@@ -1,0 +1,1 @@
+export function formatElapsed(seconds:number):string {const total=Math.max(0,Math.floor(seconds));const h=Math.floor(total/3600),m=Math.floor(total/60)%60,s=total%60;return (h?h+'时':'')+String(m).padStart(2,'0')+'分'+String(s).padStart(2,'0')+'秒';}

@@ -1,0 +1,2 @@
+import { chromium } from '@playwright/test';
+const browser=await chromium.launch({channel:'msedge'});const page=await browser.newPage();page.on('pageerror',e=>console.log('ERROR',e.message));await page.goto('http://127.0.0.1:5173');console.log(await page.evaluate(()=>({hidden:document.hidden,visible:document.visibilityState})));await page.waitForTimeout(1000);console.log(await page.locator('.map-person').first().getAttribute('transform'));await page.waitForTimeout(1000);console.log(await page.locator('.map-person').first().getAttribute('transform'));await browser.close();
