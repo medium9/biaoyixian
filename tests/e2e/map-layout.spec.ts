@@ -41,7 +41,7 @@ test('放大时白边、路线及已走路段按同一比例变粗',async({page}
 test('近景里两位山友走到同一段路仍各自显示，缩回全线才聚合',async({page})=>{
  await page.setViewportSize({width:1280,height:800});
  await page.clock.install();
- await page.goto('/');
+ await page.goto('/?mode=demo');
  await page.getByLabel('你的昵称',{exact:true}).fill('观景山友');
  await page.getByRole('button',{name:'创建我的徒步身份'}).click();
  await page.evaluate(()=>{

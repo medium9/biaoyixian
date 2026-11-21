@@ -11,8 +11,8 @@ import seeds from '../../data/mock/walkers.json';
 import landmarks from '../../data/pois/landmarks.json';
 
 export interface OvertakeEvent {sequence:number;names:string[]}
-export function useSimulation(route:Route|null){
- const walkers=ref<Walker[]>(seeds.map(w=>({...w})) as Walker[]);
+export function useSimulation(route:Route|null,demo:boolean,getPeers:()=>Walker[]){
+ const walkers=ref<Walker[]>((demo?seeds:seeds.slice(0,1)).map(w=>({...w})) as Walker[]);
  const running=ref(false),started=ref(false),storageError=ref('');
  const controlMode=ref<ControlMode>('auto'),inertiaSpeed=ref(0),soundEnabled=ref(true);
  const visitedIds=ref<string[]>([]),arrivals=ref<Checkpoint[]>([]),overtake=ref<OvertakeEvent|null>(null);
@@ -20,6 +20,7 @@ export function useSimulation(route:Route|null){
  const speed=computed(()=>!running.value?0:controlMode.value==='tap'?inertiaSpeed.value:24570/(MODES[walkers.value[0].mode].hours*3600));
  const moving=computed(()=>speed.value>0&&walkers.value[0].progressM<24570);
  let identity:Profile|null=null;
+ let previousPeers:Walker[]=[];
  let frame=0,previous=0,lastPaint=0,lastSaved=0,lastTap=-Infinity,sequence=0;
  function resetClock(){previous=performance.now();lastPaint=previous;}
  function restore(profile:Profile){
@@ -45,6 +46,8 @@ export function useSimulation(route:Route|null){
   const delta=Math.max(0,(now-previous)/1000);previous=now;lastPaint=now;
   if(document.hidden)return;
   const before=walkers.value;
+  const prevPeers=previousPeers;
+  previousPeers=getPeers();
   walkers.value=before.map((w,i)=>{
    if(i!==0)return advanceWalker(w,delta);
    if(!running.value)return w;
@@ -54,7 +57,7 @@ export function useSimulation(route:Route|null){
   if(!running.value)return;
   const arrived=crossedCheckpoints(checkpoints,before[0].progressM,walkers.value[0].progressM,visitedIds.value);
   if(arrived.length){visitedIds.value.push(...arrived.map(p=>p.id));persist();if(!storageError.value)arrivals.value.push(...arrived);}
-  const passed=findOvertaken(before,walkers.value,walkers.value[0].id);
+  const passed=findOvertaken([...before,...prevPeers],[...walkers.value,...previousPeers],walkers.value[0].id);
   if(passed.length)overtake.value={sequence:++sequence,names:passed.map(w=>w.nickname)};
   if(walkers.value[0].progressM>=24570){running.value=false;inertiaSpeed.value=0;persist();}
   if(running.value&&now-lastSaved>=1000){lastSaved=now;persist();}

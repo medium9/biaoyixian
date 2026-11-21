@@ -9,7 +9,7 @@ import type {Checkpoint} from '../../domain/route/checkpoints';
 import type {Coordinate,Route} from '../../types/route';import type {Walker} from '../../types/walker';
 import {buildRouteIndex,pointAtProgress} from '../../domain/route/route-geometry';
 import {clusterPoints} from '../../services/map/walker-cluster';import pois from '../../../data/pois/landmarks.json';
-const props=defineProps<{route:Route|null;walkers:Walker[];selfId:string;selfActive:boolean;showSelf:boolean;checkpoints:Checkpoint[];arrivalId?:string;overtaking?:boolean}>();const emit=defineEmits<{ready:[];select:[ids:string[]];advance:[]}>();
+const props=defineProps<{route:Route|null;walkers:Walker[];presenceText:string;selfId:string;selfActive:boolean;showSelf:boolean;checkpoints:Checkpoint[];arrivalId?:string;overtaking?:boolean}>();const emit=defineEmits<{ready:[];select:[ids:string[]];advance:[]}>();
 // Allow room around the trail while keeping the camera within the illustrated area.
 const mapBounds={west:-1480,east:2640,north:-560,south:1920};
 const svg=ref<SVGSVGElement>();const zoom=ref(1),cx=ref(540),cy=ref(730);const width=ref(900),height=ref(800);
@@ -32,7 +32,9 @@ const groups=computed(()=>{
  if(!index.value)return [];
  const walkers=props.walkers.filter(w=>w.id!==props.selfId).map(w=>{
   const position=pointAtProgress(index.value!,w.progressM/24570);
-  return {id:w.id,...toScreen(position),position,nickname:w.nickname,distance:w.progressM,seconds:w.elapsedSeconds,moving:w.progressM<24570};
+  const variant=w.source==='online'?parseInt(w.id.slice(-2),16):Number(w.id.split('-')[1]);
+  return {id:w.id,...toScreen(position),position,nickname:w.nickname,distance:w.progressM,seconds:w.elapsedSeconds,
+   moving:w.moving??w.progressM<24570,source:w.source,variant};
  });
  // The toolbar rounds to one decimal place, so a displayed 2.0× is already a close view.
  return zoom.value>=1.95?walkers.map(w=>[w]):clusterPoints(walkers,85);
@@ -52,7 +54,7 @@ const markers=computed(()=>{
 const trail=computed(()=>{if(!index.value||!self.value||!selfPosition.value)return '';const distance=self.value.progressM/24570*index.value.total;const points=index.value.points.filter((_,i)=>index.value!.cumulative[i]<distance);return [...points,selfPosition.value].map(p=>p.join(',')).join(' ');});
 function locateMe(){if(!selfPosition.value)return;zoom.value=3;setCenter(...selfPosition.value);}
 const labels=computed(()=>{
- const entries=markers.value.filter(m=>m.group.length===1).map(m=>({...m.group[0],...m.screen,position:m.position,own:false}));
+ const entries=markers.value.filter(m=>m.group.length===1).map(m=>({id:m.group[0].id,nickname:m.group[0].nickname,distance:m.group[0].distance,seconds:m.group[0].seconds,moving:m.group[0].moving,x:m.screen.x,y:m.screen.y,position:m.position,own:false}));
  if(props.showSelf&&self.value&&selfPosition.value)entries.unshift({id:self.value.id,nickname:self.value.nickname,distance:self.value.progressM,seconds:self.value.elapsedSeconds,moving:props.selfActive,position:selfPosition.value,...toScreen(selfPosition.value),own:true});
  const obstacles=markers.value.filter(m=>m.group.length>1).map(m=>m.screen);
  const reserved=[{left:0,top:0,right:70,bottom:74},{left:width.value-255,top:height.value-46,right:width.value,bottom:height.value}];
@@ -124,6 +126,11 @@ function up(e:PointerEvent){
 }
 function cancel(e:PointerEvent){tapCandidate=null;pointers.delete(e.pointerId);}
 function select(group:typeof groups.value[number]){emit('select',group.map(p=>p.id));if(group.length>1){cx.value=group[0].position[0];cy.value=group[0].position[1];zoomAt(1.7);}}
+function markerLabel(group:typeof groups.value[number]){
+ const player=group[0];
+ if(player.source==='online')return group.length>1?'查看 '+group.length+' 位在线山友':'查看在线山友 '+player.nickname;
+ return group.length>1?'查看 '+group.length+' 个模拟人物':'查看模拟人物 '+player.id;
+}
 let observer:ResizeObserver;
 onMounted(()=>{observer=new ResizeObserver(([entry])=>{width.value=Math.max(1,entry.contentRect.width);height.value=Math.max(1,entry.contentRect.height);setCenter(cx.value,cy.value);});observer.observe(svg.value!);document.addEventListener('pointerup',contactEnd,true);document.addEventListener('pointercancel',contactEnd,true);window.addEventListener('blur',clearGesture);emit('ready');});
 onBeforeUnmount(()=>{observer?.disconnect();document.removeEventListener('pointerup',contactEnd,true);document.removeEventListener('pointercancel',contactEnd,true);window.removeEventListener('blur',clearGesture);});defineExpose({fit,locateMe,zoomToRoute,zoomOut,zoom});
@@ -140,17 +147,17 @@ onBeforeUnmount(()=>{observer?.disconnect();document.removeEventListener('pointe
 <g class="map-labels" pointer-events="none"><g v-for="label in labels" :key="label.id">
 <line :x1="label.position[0]" :y1="label.position[1]" :x2="label.mapX" :y2="label.mapY" :stroke="label.own?'#df8a49':'#899e82'" stroke-width="1" stroke-opacity=".65" vector-effect="non-scaling-stroke"/>
 <g :transform="'translate('+label.mapX+','+label.mapY+') scale('+unit+')'" :data-owner="label.id"><WalkerLabel :nickname="label.nickname" :distance="label.distance" :seconds="label.seconds" :self="label.own"/></g></g></g>
-<g v-for="{group,position} in markers" :key="group.map(p=>p.id).join('-')" :transform="'translate('+position.join(',')+') scale('+unit+')'" class="map-person" role="button" tabindex="0" :aria-label="group.length>1?'查看 '+group.length+' 个模拟人物':'查看模拟人物 '+group[0].id" @pointerdown.stop @click.stop="select(group)" @keydown.enter.prevent="select(group)" @keydown.space.prevent="select(group)">
+<g v-for="{group,position} in markers" :key="group.map(p=>p.id).join('-')" :transform="'translate('+position.join(',')+') scale('+unit+')'" class="map-person" role="button" tabindex="0" :aria-label="markerLabel(group)" @pointerdown.stop @click.stop="select(group)" @keydown.enter.prevent="select(group)" @keydown.space.prevent="select(group)">
 <rect v-if="group.length===1" x="-14" y="-21" width="28" height="42" rx="4" fill="transparent" pointer-events="all"/><circle v-if="group.length>1" r="19" fill="#285e4a" stroke="white" stroke-width="3"/>
 <text v-if="group.length>1" text-anchor="middle" dy="5" fill="white" font-size="14" font-weight="bold">{{ group.length }}</text>
-<WalkerSprite v-else :color="['#476f9d','#8466ac','#427e65','#c76b65'][Number(group[0].id.split('-')[1])%4]" :moving="group[0].moving" :variant="Number(group[0].id.split('-')[1])"/>
+<WalkerSprite v-else :color="['#476f9d','#8466ac','#427e65','#c76b65'][group[0].variant%4]" :moving="group[0].moving" :variant="group[0].variant"/>
 </g>
 <g v-if="showSelf && selfPosition && self" data-testid="self-marker" :transform="'translate('+selfPosition.join(',')+') scale('+unit+')'" role="button" tabindex="0" aria-label="我的人物" class="self-marker" :class="{overtaking}" @pointerdown.stop @click.stop="emit('select',[selfId])" @keydown.enter.prevent="emit('select',[selfId])" @keydown.space.prevent="emit('select',[selfId])">
 <circle v-if="overtaking" class="pass-ring" r="30" fill="none" stroke="#f3a24d" stroke-width="3"/><circle r="25" fill="#ed8a3c" opacity=".16" class="self-halo"/><circle r="20" fill="#fff8ec" stroke="#ed8a3c" stroke-width="2.5"/>
 <WalkerSprite color="#ed8a3c" :moving="selfActive" :variant="0"/>
 <title>{{ self.nickname }} · 我</title></g></svg>
 <div class="north" aria-hidden="true">N<span>↑</span></div>
-<div class="map-legend"><span><i class="legend-self"/>我的位置</span><span><i class="legend-others"/>模拟山友 {{ walkers.length-1 }} 人</span><span>示意地图</span></div>
+<div class="map-legend"><span><i class="legend-self"/>我的位置</span><span data-testid="presence-status" aria-live="polite"><i class="legend-others"/>{{ presenceText }}</span><span>示意地图</span></div>
 </div></template>
 
 

@@ -6,8 +6,8 @@ const routeData=JSON.parse(readFileSync(new URL('../../data/routes/schematic/bia
 const landmarks=JSON.parse(readFileSync(new URL('../../data/pois/landmarks.json',import.meta.url),'utf8'));
 const checkpoints=buildCheckpoints(routeData as Route,landmarks);
 test.setTimeout(15000);
-async function prepare(page:Page,extra:Record<string,unknown>={}){
- await page.goto('/');
+async function prepare(page:Page,extra:Record<string,unknown>={},entry='/'){
+ await page.goto(entry);
  await page.evaluate(extra=>{
   localStorage.setItem('yunzou.profile.v1',JSON.stringify({id:'test-traveler',nickname:'惯性山友'}));
   localStorage.setItem('yunzou.walk.v1:test-traveler:biaoyixian:1.0',JSON.stringify({profileId:'test-traveler',routeId:'biaoyixian',routeVersion:'1.0',mode:'hike',progressM:0,elapsedSeconds:0,started:true,controlMode:'tap',visitedIds:[],soundEnabled:true,...extra}));
@@ -77,7 +77,7 @@ test('底部加速操作区独立于地图人物画布',async({page})=>{
 });
 
 test('真实超过模拟山友时出现光圈与昵称反馈，刷新不重播',async({page})=>{
- await prepare(page,{progressM:695,elapsedSeconds:100});
+ await prepare(page,{progressM:695,elapsedSeconds:100},'/?mode=demo');
  for(let i=0;i<12;i++){await page.getByRole('button',{name:'点击加速',exact:true}).click();await page.waitForTimeout(100);}
  await expect(page.getByTestId('overtake-toast')).toContainText('山友 02');
  await expect(page.locator('.self-marker .pass-ring')).toHaveCount(1);

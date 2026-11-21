@@ -9,6 +9,7 @@ import JoinTrail from '../components/onboarding/JoinTrail.vue';
 import {readProfile,type Profile} from '../domain/profile/profile';
 import {loadRoute} from '../services/data/route-loader';
 import {useSimulation} from '../composables/use-simulation';
+import {usePresence} from '../composables/use-presence';
 import {useArrivalFeedback} from '../composables/use-arrival-feedback';
 import {MODES} from '../domain/walking/walking-engine';
 import {formatElapsed} from '../utils/format-walk';
@@ -21,11 +22,23 @@ let storedProfile:Profile|null=null;
 try{storedProfile=readProfile(localStorage);}catch{}
 const profile=ref<Profile|null>(storedProfile),mode=ref<WalkingMode>('hike'),ready=ref(false);
 const selected=ref<string[]>([]),canvas=ref<InstanceType<typeof MapCanvas>>();
-const {walkers,running,moving,started,start,restore,storageError,controlMode,setControlMode,tap,speed,soundEnabled,toggleSound,checkpoints,arrivals,overtake}=useSimulation(route);
+const demo=new URLSearchParams(location.search).get('mode')==='demo';
+const presence=usePresence(route,()=>profile.value?{...me.value,moving:moving.value}:null,!demo);
+const {walkers,running,moving,started,start,restore,storageError,controlMode,setControlMode,tap,speed,soundEnabled,toggleSound,checkpoints,arrivals,overtake}=useSimulation(route,demo,()=>presence.players.value);
 if(profile.value){restore(profile.value);mode.value=walkers.value[0].mode;}
 const {activeArrival,passedNames,unlockSound,dismiss}=useArrivalFeedback(arrivals,overtake,soundEnabled);
-const people=computed(()=>walkers.value.filter(w=>selected.value.includes(w.id)));
+const mapWalkers=computed(()=>[...walkers.value,...presence.players.value]);
+const people=computed(()=>mapWalkers.value.filter(w=>selected.value.includes(w.id)));
 const me=computed(()=>walkers.value[0]),progress=computed(()=>me.value.progressM/24570*100);
+const presenceText=computed(()=>{
+ if(demo)return '模拟山友 '+(walkers.value.length-1)+' 人';
+ if(!route)return '路线暂不可用';
+ if(presence.status.value==='offline')return '连接断开 · 可继续行走';
+ if(presence.status.value==='full')return '路线已满 · 等待空位';
+ if(presence.status.value==='connecting')return '正在连接同行地图';
+ const peers=presence.players.value.length;
+ return peers?'在线同行 '+peers+' 人':'已连接 · 等待同行者';
+});
 const next=computed(()=>checkpoints.find(p=>p.distanceM>me.value.progressM));
 const countdown=ref(0);let timer:ReturnType<typeof setInterval>|undefined;
 const finished=computed(()=>me.value.progressM>=24570);
@@ -55,7 +68,7 @@ onUnmounted(()=>clearInterval(timer));
    <div v-if="profile" class="player-chip"><span aria-hidden="true">{{ profile.nickname.slice(0,1) }}</span><strong>{{ profile.nickname }}</strong></div>
   </header>
   <section class="workspace trail-workspace">
-   <MapCanvas ref="canvas" :route="route" :walkers="walkers" :self-id="me.id" :self-active="moving" :show-self="!!profile" :checkpoints="checkpoints" :arrival-id="activeArrival?.id" :overtaking="passedNames.length>0" @ready="ready=true" @select="selected=$event" @advance="accelerate"/>
+   <MapCanvas ref="canvas" :route="route" :walkers="mapWalkers" :presence-text="presenceText" :self-id="me.id" :self-active="moving" :show-self="!!profile" :checkpoints="checkpoints" :arrival-id="activeArrival?.id" :overtaking="passedNames.length>0" @ready="ready=true" @select="selected=$event" @advance="accelerate"/>
    <section class="trail-dock" aria-label="底部行走与地图操控">
     <div class="dock-inner">
      <div class="dock-summary">
@@ -100,7 +113,7 @@ onUnmounted(()=>clearInterval(timer));
    <div v-if="countdown" class="countdown-overlay" role="status"><div><small>老和云起 · 准备出发</small><strong :key="countdown">{{ countdown }}</strong><span>即将沿标毅线前进</span></div></div>
   </section>
  </main>
- <JoinTrail v-if="!profile" @join="join"/>
+ <JoinTrail v-if="!profile" :demo="demo" @join="join"/>
 </template>
 
 
